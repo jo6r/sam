@@ -26,6 +26,7 @@ spec:
       containers:
         - name: nginx-qr
           image: jo6r/qr:0.1
+          imagePullPolicy: Always
           ports:
             - containerPort: 80
 ---
