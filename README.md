@@ -2,9 +2,9 @@
 
 # frontend
 * react aplikace
- * qr scanner, knihovna https://github.com/cozmo/jsQR/blob/master/dist/jsQR.js
+ * qr scanner, https://github.com/cozmo/jsQR
  * rest client
 
 # backend
-* posgressql
+* PostgreSQL
 * django + rest api
