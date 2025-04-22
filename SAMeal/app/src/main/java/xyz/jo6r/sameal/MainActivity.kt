@@ -57,26 +57,37 @@ fun QRScannerView() {
     var qrCodeText by remember { mutableStateOf("Žádný QR kód") }
 
     // Dny a jídla
-    val days = listOf("Čt (7.8)" to 1, "Pá (8.8)" to 2, "So (9.8)" to 3, "Ne (10.8)" to 4)
+    // Map code to label
+    val days = listOf(
+        "ct" to "Čt (7.8)",
+        "pa" to "Pá (8.8)",
+        "so" to "So (9.8)",
+        "ne" to "Ne (10.8)"
+    )
     val calendar = java.util.Calendar.getInstance()
-    val dayValue = when (calendar.get(java.util.Calendar.DAY_OF_WEEK)) {
-        java.util.Calendar.THURSDAY -> 1
-        java.util.Calendar.FRIDAY -> 2
-        java.util.Calendar.SATURDAY -> 3
-        java.util.Calendar.SUNDAY -> 4
-        else -> 1
+    val currentCode = when (calendar.get(java.util.Calendar.DAY_OF_WEEK)) {
+        java.util.Calendar.THURSDAY -> "ct"
+        java.util.Calendar.FRIDAY -> "pa"
+        java.util.Calendar.SATURDAY -> "so"
+        java.util.Calendar.SUNDAY -> "ne"
+        else -> "ct"
     }
-    var selectedDay by remember { mutableStateOf(days.first { it.second == dayValue }) }
+    var selectedDay by remember { mutableStateOf(days.first { it.first == currentCode }) }
 
-    val meals = listOf("Snídaně" to 1, "Oběd" to 2, "Večeře" to 3)
     val hour = LocalTime.now().hour
-    val mealValue = when {
-        hour in 7..10 -> 1
-        hour in 11..15 -> 2
-        hour in 17..21 -> 3
-        else -> 1
+    val meals = listOf(
+        "snidane" to "Snídaně",
+        "obed" to "Oběd",
+        "vecere" to "Večeře"
+    )
+
+    val currentMealCode = when {
+        hour in 7..10 -> "snidane"
+        hour in 11..15 -> "obed"
+        hour in 17..21 -> "vecere"
+        else -> "snidane"
     }
-    var selectedMeal by remember { mutableStateOf(meals.first { it.second == mealValue }) }
+    var selectedMeal by remember { mutableStateOf(meals.first { it.first == currentMealCode }) }
 
     Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
         // Výběr dní po dvou tlačítkách
@@ -93,13 +104,14 @@ fun QRScannerView() {
                             containerColor = if (selectedDay == day) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant
                         ),
                         shape = RoundedCornerShape(8.dp)
-                    ) { Text(day.first) }
+                    ) { Text(day.second) }
                 }
             }
             Spacer(modifier = Modifier.height(8.dp))
         }
 
         Spacer(modifier = Modifier.height(8.dp))
+
         // Výběr jídel
         Row(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -113,7 +125,7 @@ fun QRScannerView() {
                         containerColor = if (selectedMeal == meal) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant
                     ),
                     shape = RoundedCornerShape(8.dp)
-                ) { Text(meal.first) }
+                ) { Text(meal.second) }
             }
         }
 
@@ -159,7 +171,7 @@ fun QRScannerView() {
         )
 
         Spacer(modifier = Modifier.height(64.dp))
-        Text("Vybrané: den=${selectedDay.second}, jídlo=${selectedMeal.second}", modifier = Modifier.align(Alignment.CenterHorizontally))
+        Text("den=${selectedDay.first}, jídlo=${selectedMeal.first}", modifier = Modifier.align(Alignment.CenterHorizontally))
         Text("QR kód: $qrCodeText", modifier = Modifier.align(Alignment.CenterHorizontally))
         Row(
             modifier = Modifier
