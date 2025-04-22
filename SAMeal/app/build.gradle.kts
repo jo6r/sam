@@ -1,4 +1,9 @@
 import com.android.build.gradle.internal.api.BaseVariantOutputImpl
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
+
+val buildTimestamp: String = SimpleDateFormat("yyyyMMdd", Locale.getDefault()).format(Date())
 
 plugins {
     alias(libs.plugins.android.application)
@@ -15,7 +20,7 @@ android {
         minSdk = 24
         targetSdk = 35
         versionCode = 1
-        versionName = "1.0.1"
+        versionName = "1.0.2-$buildTimestamp"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
