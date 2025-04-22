@@ -1,34 +1,26 @@
 package xyz.jo6r.sameal
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.pm.PackageManager
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageAnalysis
-import androidx.camera.core.ImageProxy
+import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -43,18 +35,12 @@ import java.time.LocalTime
 import java.util.concurrent.Executors
 
 class MainActivity : ComponentActivity() {
-
-    private val cameraExecutor = Executors.newSingleThreadExecutor()
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
-            != PackageManager.PERMISSION_GRANTED
-        ) {
+        // Camera permission
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.CAMERA), 0)
         }
-
         setContent {
             SAMealTheme {
                 Surface(modifier = Modifier.fillMaxSize()) {
@@ -67,137 +53,114 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun QRScannerView() {
-    val context = LocalContext.current
+    val activity = LocalContext.current as ComponentActivity
     var qrCodeText by remember { mutableStateOf("Žádný QR kód") }
 
-    // vyber dne
+    // Dny a jídla
+    val days = listOf("Čt (7.8)" to 1, "Pá (8.8)" to 2, "So (9.8)" to 3, "Ne (10.8)" to 4)
     val calendar = java.util.Calendar.getInstance()
-    val dayOfWeek = calendar.get(java.util.Calendar.DAY_OF_WEEK)
-
-    val selectedDayValue = when (dayOfWeek) {
+    val dayValue = when (calendar.get(java.util.Calendar.DAY_OF_WEEK)) {
         java.util.Calendar.THURSDAY -> 1
         java.util.Calendar.FRIDAY -> 2
         java.util.Calendar.SATURDAY -> 3
         java.util.Calendar.SUNDAY -> 4
         else -> 1
     }
+    var selectedDay by remember { mutableStateOf(days.first { it.second == dayValue }) }
 
-    val days = listOf("Čt (7.8)" to 1, "Pá (8.8)" to 2, "So (9.8)" to 3, "Ne (10.8)" to 4)
-    var selectedDay by remember {
-        mutableStateOf(days.firstOrNull { it.second == selectedDayValue } ?: days[0])
-    }
-
-    // vyber sravy
     val meals = listOf("Snídaně" to 1, "Oběd" to 2, "Večeře" to 3)
-    val currentHour = LocalTime.now().hour
-    var selectedMeal by remember {
-        mutableStateOf(
-            when (currentHour) {
-                in 7..10 -> meals[0]
-                in 11..15 -> meals[1]
-                in 17..21 -> meals[2]
-                else -> meals[0]
-            }
-        )
+    val hour = LocalTime.now().hour
+    val mealValue = when {
+        hour in 7..10 -> 1
+        hour in 11..15 -> 2
+        hour in 17..21 -> 3
+        else -> 1
     }
+    var selectedMeal by remember { mutableStateOf(meals.first { it.second == mealValue }) }
 
-    Column(modifier = Modifier.fillMaxSize()) {
-
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-        ) {
-            days.chunked(2).forEach { rowDays ->
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    rowDays.forEach { day ->
-                        Button(
-                            onClick = { selectedDay = day },
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = if (selectedDay == day) MaterialTheme.colorScheme.primary else Color.LightGray
-                            ),
-                            modifier = Modifier.weight(1f)
-                        ) {
-                            Text(day.first)
-                        }
-                    }
+    Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
+        // Výběr dní po dvou tlačítkách
+        days.chunked(2).forEach { rowDays ->
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                rowDays.forEach { day ->
+                    Button(
+                        onClick = { selectedDay = day },
+                        modifier = Modifier.weight(1f),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = if (selectedDay == day) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant
+                        ),
+                        shape = RoundedCornerShape(8.dp)
+                    ) { Text(day.first) }
                 }
-                Spacer(modifier = Modifier.height(8.dp))
             }
+            Spacer(modifier = Modifier.height(8.dp))
         }
 
+        Spacer(modifier = Modifier.height(8.dp))
+        // Výběr jídel
         Row(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
+            modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)
         ) {
             meals.forEach { meal ->
                 Button(
                     onClick = { selectedMeal = meal },
+                    modifier = Modifier.weight(1f),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = if (selectedMeal == meal) MaterialTheme.colorScheme.primary else Color.LightGray
+                        containerColor = if (selectedMeal == meal) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant
                     ),
-                    modifier = Modifier.weight(1f)
-                ) {
-                    Text(meal.first)
-                }
+                    shape = RoundedCornerShape(8.dp)
+                ) { Text(meal.first) }
             }
         }
 
-        Box(modifier = Modifier.weight(1f)) {
-            AndroidView(factory = { ctx ->
-                val previewView = PreviewView(ctx)
-                val cameraProviderFuture = ProcessCameraProvider.getInstance(ctx)
-
-                cameraProviderFuture.addListener({
-                    val cameraProvider = cameraProviderFuture.get()
-                    val preview = androidx.camera.core.Preview.Builder().build().also {
-                        it.setSurfaceProvider(previewView.surfaceProvider)
+        // PreviewView setup
+        val previewView = remember { PreviewView(activity) }
+        LaunchedEffect(previewView) {
+            val cameraProvider = ProcessCameraProvider.getInstance(activity).get()
+            val preview = Preview.Builder().build().also {
+                it.setSurfaceProvider(previewView.surfaceProvider)
+            }
+            val analysis = ImageAnalysis.Builder()
+                .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
+                .build().also { imageAnalysis ->
+                    imageAnalysis.setAnalyzer(Executors.newSingleThreadExecutor()) { proxy ->
+                        proxy.image?.let { mediaImage ->
+                            val image = InputImage.fromMediaImage(mediaImage, proxy.imageInfo.rotationDegrees)
+                            BarcodeScanning.getClient().process(image)
+                                .addOnSuccessListener { barcodes ->
+                                    barcodes.firstOrNull()?.rawValue?.let { qrCodeText = it }
+                                }
+                                .addOnCompleteListener { proxy.close() }
+                        } ?: proxy.close()
                     }
-
-                    val barcodeScanner = BarcodeScanning.getClient()
-                    val analysis = ImageAnalysis.Builder()
-
-                        .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
-                        .build()
-
-                    analysis.setAnalyzer(Executors.newSingleThreadExecutor()) { imageProxy ->
-                        processImageProxy(barcodeScanner, imageProxy) { result ->
-                            qrCodeText = result
-                        }
-                    }
-
-                    val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
-
-                    try {
-                        cameraProvider.unbindAll()
-                        cameraProvider.bindToLifecycle(
-                            context as ComponentActivity,
-                            cameraSelector,
-                            preview,
-                            analysis
-                        )
-                    } catch (e: Exception) {
-                        e.printStackTrace()
-                    }
-                }, ContextCompat.getMainExecutor(ctx))
-
-                previewView
-            }, modifier = Modifier.fillMaxSize())
+                }
+            try {
+                cameraProvider.unbindAll()
+                cameraProvider.bindToLifecycle(
+                    activity,
+                    CameraSelector.DEFAULT_BACK_CAMERA,
+                    preview,
+                    analysis
+                )
+            } catch (e: Exception) { e.printStackTrace() }
         }
 
-        Text(
-            text = "Vybrane hodnoty ${selectedDay.second} , ${selectedMeal.second}",
+        Spacer(modifier = Modifier.height(64.dp))
+        AndroidView(
+            factory = { previewView },
+            modifier = Modifier
+                .size(300.dp)
+                .border(2.dp, Color.Red, RoundedCornerShape(8.dp))
+                .align(Alignment.CenterHorizontally)
         )
 
-        Text(
-            text = "QR kód: $qrCodeText",
-        )
-
+        Spacer(modifier = Modifier.height(64.dp))
+        Text("Vybrané: den=${selectedDay.second}, jídlo=${selectedMeal.second}", modifier = Modifier.align(Alignment.CenterHorizontally))
+        Text("QR kód: $qrCodeText", modifier = Modifier.align(Alignment.CenterHorizontally))
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -213,20 +176,4 @@ fun QRScannerView() {
             }
         }
     }
-}
-
-private fun processImageProxy(
-    scanner: com.google.mlkit.vision.barcode.BarcodeScanner,
-    imageProxy: ImageProxy,
-    onResult: (String) -> Unit
-) {
-    val mediaImage = imageProxy.image
-    mediaImage?.let {
-        val image = InputImage.fromMediaImage(it, imageProxy.imageInfo.rotationDegrees)
-        scanner.process(image)
-            .addOnSuccessListener { barcodes ->
-                barcodes.firstOrNull()?.rawValue?.let(onResult)
-            }
-            .addOnCompleteListener { imageProxy.close() }
-    } ?: imageProxy.close()
 }
