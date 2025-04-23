@@ -41,6 +41,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -82,6 +83,12 @@ fun QRScannerView() {
     var paymentStatus by remember { mutableStateOf<String?>(null) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
 
+    val context = LocalContext.current
+    val versionName = context.packageManager
+        .getPackageInfo(context.packageName, 0)
+        .versionName
+
+
     // Dny a jídla
     val days = listOf(
         "ct" to "Čt (7.8)",
@@ -113,6 +120,15 @@ fun QRScannerView() {
         else -> "snidane"
     }
     var selectedMeal by remember { mutableStateOf(meals.first { it.first == currentMealCode }) }
+
+    Row(modifier = Modifier.fillMaxSize()) {
+        Text(
+            text = "build: $versionName",
+            color = MaterialTheme.colorScheme.primary,
+            fontSize = 8.sp,
+            modifier = Modifier.padding(8.dp).align(Alignment.Bottom)
+        )
+    }
 
     Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
 
