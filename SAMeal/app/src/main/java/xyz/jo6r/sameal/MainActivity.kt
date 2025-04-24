@@ -236,6 +236,7 @@ fun QRScannerView() {
                             (url.openConnection() as HttpURLConnection).run {
                                 requestMethod = "GET"
                                 setRequestProperty("Authorization", "123")
+                                setRequestProperty("SAMeal", "$versionName")
                                 connectTimeout = 5000
                                 readTimeout = 5000
                                 val code = responseCode
