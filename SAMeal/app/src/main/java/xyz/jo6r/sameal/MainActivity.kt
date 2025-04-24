@@ -227,7 +227,7 @@ fun QRScannerView() {
                         paymentStatus = null
                         errorMessage = null
                         try {
-                            val url = URL("https://api.xcamp.cz?id=${qrCodeText}&den=${selectedDay.first}&strava_program=${selectedMeal.first}")
+                            val url = URL("https://api.samorlova.cz?id=${qrCodeText}&den=${selectedDay.first}&strava_program=${selectedMeal.first}")
                             (url.openConnection() as HttpURLConnection).run {
                                 requestMethod = "GET"
                                 setRequestProperty("Authorization", "123")
