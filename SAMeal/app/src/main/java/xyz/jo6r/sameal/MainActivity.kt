@@ -1,6 +1,7 @@
 package xyz.jo6r.sameal
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.pm.PackageManager
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -73,6 +74,7 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+@SuppressLint("ContextCastToActivity")
 @Composable
 fun QRScannerView() {
     val activity = LocalContext.current as ComponentActivity
@@ -176,7 +178,7 @@ fun QRScannerView() {
         LaunchedEffect(previewView) {
             val cameraProvider = ProcessCameraProvider.getInstance(activity).get()
             val preview = Preview.Builder().build().also {
-                it.setSurfaceProvider(previewView.surfaceProvider)
+                it.surfaceProvider = previewView.surfaceProvider
             }
             val analysis = ImageAnalysis.Builder()
                 .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
