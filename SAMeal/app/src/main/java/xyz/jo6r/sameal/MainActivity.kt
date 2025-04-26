@@ -228,32 +228,39 @@ fun QRScannerView() {
         ) {
             Button(
                 onClick = {
-                    coroutineScope.launch(Dispatchers.IO) {
-                        paymentStatus = null
-                        errorMessage = null
-                        try {
-                            val url = URL("https://api.samorlova.cz?id=${qrCodeText}&den=${selectedDay.first}&strava_program=${selectedMeal.first}")
-                            (url.openConnection() as HttpURLConnection).run {
-                                requestMethod = "GET"
-                                setRequestProperty("Authorization", "123")
-                                setRequestProperty("SAMeal", "$versionName")
-                                connectTimeout = 5000
-                                readTimeout = 5000
-                                val code = responseCode
-                                if (code == HttpURLConnection.HTTP_OK) {
-                                    val response = inputStream.bufferedReader().use { it.readText() }
-                                    val json = JSONObject(response)
-                                    if (json.getString("result") == "success") {
-                                        paymentStatus = json.getJSONObject("data").getString("zaplaceno")
+                    if (qrCodeText.isBlank()) {
+                        errorMessage = "Není načten QR kód"
+                    } else {
+                        coroutineScope.launch(Dispatchers.IO) {
+                            paymentStatus = null
+                            errorMessage = null
+                            try {
+                                val url =
+                                    URL("https://api.samorlova.cz?id=${qrCodeText}&den=${selectedDay.first}&strava_program=${selectedMeal.first}")
+                                (url.openConnection() as HttpURLConnection).run {
+                                    requestMethod = "GET"
+                                    setRequestProperty("Authorization", "123")
+                                    setRequestProperty("SAMeal", "$versionName")
+                                    connectTimeout = 5000
+                                    readTimeout = 5000
+                                    val code = responseCode
+                                    if (code == HttpURLConnection.HTTP_OK) {
+                                        val response =
+                                            inputStream.bufferedReader().use { it.readText() }
+                                        val json = JSONObject(response)
+                                        if (json.getString("result") == "success") {
+                                            paymentStatus =
+                                                json.getJSONObject("data").getString("zaplaceno")
+                                        } else {
+                                            errorMessage = json.getString("error")
+                                        }
                                     } else {
-                                        errorMessage = json.getString("error")
+                                        errorMessage = "HTTP error $code"
                                     }
-                                } else {
-                                    errorMessage = "HTTP error $code"
                                 }
+                            } catch (e: Exception) {
+                                errorMessage = e.localizedMessage
                             }
-                        } catch (e: Exception) {
-                            errorMessage = e.localizedMessage
                         }
                     }
                 },
