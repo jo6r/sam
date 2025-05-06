@@ -52,6 +52,7 @@ import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.common.InputImage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import org.json.JSONException
 import org.json.JSONObject
 import xyz.jo6r.sameal.ui.theme.SAMealTheme
 import java.net.HttpURLConnection
@@ -249,17 +250,18 @@ fun QRScannerView() {
                                             inputStream.bufferedReader().use { it.readText() }
                                         val json = JSONObject(response)
                                         if (json.getString("result") == "success") {
-                                            paymentStatus =
-                                                json.getJSONObject("data").getString("zaplaceno")
+                                            paymentStatus = json.getJSONObject("data").getString("zaplaceno")
                                         } else {
                                             errorMessage = json.getString("error")
                                         }
                                     } else {
-                                        errorMessage = "HTTP error $code"
+                                        errorMessage = "Server HTTP error $code"
                                     }
                                 }
+                            } catch (e: JSONException) {
+                                errorMessage = "Error parse response. " + e.localizedMessage
                             } catch (e: Exception) {
-                                errorMessage = e.localizedMessage
+                                errorMessage = "Fatal error. " + e.localizedMessage
                             }
                         }
                     }
@@ -300,7 +302,7 @@ fun QRScannerView() {
         }
         errorMessage?.let {
             Spacer(modifier = Modifier.height(8.dp))
-            Text("Error: $it", color = Color.Red, modifier = Modifier.align(Alignment.CenterHorizontally))
+            Text(it, color = Color.Red, modifier = Modifier.align(Alignment.CenterHorizontally))
         }
     }
 }
