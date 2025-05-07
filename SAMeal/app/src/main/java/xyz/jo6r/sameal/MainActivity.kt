@@ -240,7 +240,8 @@ fun QRScannerView() {
                                     URL("https://api.samorlova.cz?id=${qrCodeText}&den=${selectedDay.first}&strava_program=${selectedMeal.first}")
                                 (url.openConnection() as HttpURLConnection).run {
                                     requestMethod = "GET"
-                                    setRequestProperty("Authorization", "123")
+//                                    setRequestProperty("Authorization", "123")    // dev key
+                                    setRequestProperty("Authorization", "FB2c00KYKfwfk7nBvUaK")     // prod key
                                     setRequestProperty("SAMeal", "$versionName")
                                     connectTimeout = 5000
                                     readTimeout = 5000
