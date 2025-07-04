@@ -1,10 +1,8 @@
 # sam
 
-# frontend
-* react aplikace
- * qr scanner, https://github.com/cozmo/jsQR
- * rest client
+# android aplikace
+* rest client
+* qr scanner, vyuziva androidx.camera:camera-core
 
-# backend
-* PostgreSQL
-* django + rest api
+# backend (spravuje SAM)
+* rest api + db
