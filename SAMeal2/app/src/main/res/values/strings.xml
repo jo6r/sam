@@ -1,0 +1,33 @@
+<resources>
+    <string name="app_name">SAMeal</string>
+    <string name="menu_about">O aplikaci</string>
+    <string name="menu_reset">Resetovat vydané porce</string>
+    <string name="reset_dialog_title">Resetovat data?</string>
+    <string name="reset_dialog_text">Tímto se smažou všechny záznamy o vydaných jídlech. Tato akce je nevratná.</string>
+    <string name="btn_reset">Resetovat</string>
+    <string name="btn_cancel">Zrušit</string>
+    <string name="app_version">Verze aplikace: %1$s</string>
+    <string name="android_version">Verze Androidu: %1$s (API %2$d)</string>
+    <string name="btn_close">Zavřít</string>
+    <string name="label_select_day">Vyber den:</string>
+    <string name="label_select_meal">Vyber stravu:</string>
+    <string name="label_served_count">Vydáno: %1$d / %2$d</string>
+    <string name="camera_permission_denied">Není povolena kamera</string>
+    <string name="label_qr_code">QR kód:</string>
+    <string name="btn_verify_qr">Ověřit QR kód</string>
+    <string name="error_prefix">Chyba: %1$s</string>
+    <string name="status_ok_default">VŠE V POŘÁDKU</string>
+    <string name="status_not_paid">Strava NENÍ zaplacena</string>
+    <string name="status_error_title">CHYBA</string>
+    <string name="error_unknown">Neznámá chyba</string>
+    <string name="content_desc_menu">Menu</string>
+
+    <string name="day_ct">Čt 13.8.</string>
+    <string name="day_pa">Pá 14.8.</string>
+    <string name="day_so">So 15.8.</string>
+    <string name="day_ne">Ne 16.8.</string>
+
+    <string name="meal_snidane">Snídaně</string>
+    <string name="meal_obed">Oběd</string>
+    <string name="meal_vecere">Večeře</string>
+</resources>
